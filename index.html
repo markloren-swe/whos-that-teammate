@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fbbf24">
+  <title>Who's That Teammate? Baby Picture Challenge</title>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --paper: #fff8e8;
+      --white: #ffffff;
+      --amber: #fbbf24;
+      --amber-dark: #b45309;
+      --pink: #f9a8d4;
+      --sky: #bae6fd;
+      --muted: #64748b;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#f59e0b 1px, transparent 1px);
+      background-size: 24px 24px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .45; box-shadow: none !important; transform: none !important; }
+    img { display: block; max-width: 100%; }
+    .hidden { display: none !important; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px clamp(18px, 4vw, 48px);
+      background: var(--white);
+      border-bottom: 4px solid var(--ink);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; border: 0; background: transparent; color: inherit; text-align: left; }
+    .brand-icon { display: grid; place-items: center; width: 46px; height: 46px; border: var(--border); border-radius: 15px; background: var(--amber); box-shadow: 3px 3px 0 var(--ink); font-size: 24px; }
+    .brand strong { display: block; font-size: clamp(14px, 2.2vw, 20px); line-height: 1; }
+    .brand small { color: var(--amber-dark); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .header-actions { display: flex; gap: 8px; }
+
+    .screen { width: min(1200px, calc(100% - 32px)); min-height: calc(100vh - 78px); margin: 0 auto; padding: 44px 0; animation: enter .28s ease-out; }
+    @keyframes enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    .btn {
+      min-height: 48px;
+      padding: 11px 20px;
+      border: var(--border);
+      border-radius: 15px;
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 900;
+      box-shadow: 4px 4px 0 var(--ink);
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease;
+    }
+    .btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--ink); }
+    .btn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+    .btn-primary { background: var(--amber); }
+    .btn-dark { color: white; background: var(--ink); }
+    .btn-small { min-height: 42px; padding: 8px 13px; }
+    .btn-danger { color: #b91c1c; background: #fee2e2; }
+    .btn-link { border: 0; box-shadow: none; background: transparent; color: var(--muted); }
+    .btn-link:hover:not(:disabled) { color: var(--ink); box-shadow: none; transform: none; }
+
+    .hero { display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 60px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border: var(--border); border-radius: 999px; background: var(--pink); box-shadow: 3px 3px 0 var(--ink); font-size: 13px; font-weight: 900; }
+    h1 { max-width: 760px; margin: 24px 0 0; font-size: clamp(50px, 7vw, 88px); line-height: .92; letter-spacing: -.045em; }
+    h1 span { color: #f59e0b; text-shadow: 3px 3px 0 var(--ink); }
+    .lead { max-width: 650px; margin: 25px 0; color: #475569; font-size: 19px; line-height: 1.65; font-weight: 600; }
+    .actions { display: flex; flex-wrap: wrap; gap: 13px; }
+
+    .hero-card { position: relative; max-width: 430px; margin: auto; padding: 15px; aspect-ratio: 4 / 5; border: 4px solid var(--ink); border-radius: 38px; background: white; box-shadow: 12px 12px 0 var(--ink); transform: rotate(1deg); }
+    .hero-photo { width: 100%; height: 100%; border-radius: 27px; object-fit: cover; filter: blur(20px); transform: scale(1.08); }
+    .hero-placeholder { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 27px; background: linear-gradient(135deg, var(--sky), var(--pink)); font-size: 110px; filter: blur(14px); }
+    .hero-label { position: absolute; right: 30px; bottom: 30px; left: 30px; padding: 16px; border: var(--border); border-radius: 17px; background: rgba(255,255,255,.94); box-shadow: 4px 4px 0 var(--ink); text-align: center; font-weight: 950; font-size: 25px; }
+    .hero-label small { display: block; color: var(--amber-dark); font-size: 11px; letter-spacing: .16em; }
+
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+    .eyebrow { margin: 0 0 6px; color: var(--amber-dark); font-weight: 950; letter-spacing: .2em; text-transform: uppercase; }
+    h2 { margin: 0; font-size: clamp(38px, 5vw, 58px); line-height: 1; letter-spacing: -.035em; }
+    .muted { color: var(--muted); }
+    .count-pill { flex: none; padding: 12px 17px; border: var(--border); border-radius: 16px; background: white; box-shadow: 4px 4px 0 var(--ink); font-weight: 900; }
+
+    .setup-grid { display: grid; grid-template-columns: minmax(300px, .75fr) minmax(0, 1.25fr); align-items: start; gap: 26px; }
+    .card { border: 4px solid var(--ink); border-radius: 29px; background: white; box-shadow: 8px 8px 0 var(--ink); overflow: hidden; }
+    .card-body { padding: 25px; }
+    .card h3 { margin: 0 0 20px; font-size: 25px; }
+    label { display: block; margin: 17px 0 7px; font-weight: 850; }
+    input[type="text"] { width: 100%; height: 50px; padding: 0 15px; border: 2px solid var(--ink); border-radius: 13px; outline: none; background: white; font-weight: 650; }
+    input[type="text"]:focus { box-shadow: 0 0 0 4px rgba(251,191,36,.4); }
+    .upload {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      width: 100%;
+      padding: 0;
+      overflow: hidden;
+      border: 3px dashed var(--ink);
+      border-radius: 18px;
+      background: #fffbeb;
+      text-align: center;
+    }
+    .upload.dragover { background: var(--sky); }
+    .upload img { width: 100%; height: 220px; object-fit: cover; }
+    .upload-icon { font-size: 45px; }
+    .full { width: 100%; margin-top: 18px; }
+
+    .empty { display: grid; min-height: 320px; place-items: center; padding: 35px; border: 4px solid var(--ink); border-radius: 28px; background: var(--sky); box-shadow: 8px 8px 0 var(--ink); text-align: center; }
+    .participants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .person { overflow: hidden; border: var(--border); border-radius: 22px; background: white; box-shadow: 5px 5px 0 var(--ink); }
+    .person-photo { position: relative; height: 155px; overflow: hidden; background: #e2e8f0; }
+    .person-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .person-number { position: absolute; top: 10px; left: 10px; padding: 4px 10px; border: 2px solid var(--ink); border-radius: 999px; background: var(--amber); font-size: 12px; font-weight: 950; }
+    .person-info { display: flex; align-items: start; justify-content: space-between; gap: 8px; padding: 14px; }
+    .person-info strong { display: block; font-size: 18px; }
+    .person-info small { display: block; margin-top: 4px; color: var(--muted); }
+    .ready { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 20px; padding: 19px; border: 4px solid var(--ink); border-radius: 24px; background: var(--pink); box-shadow: 7px 7px 0 var(--ink); }
+
+    .game-top { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 15px; margin-bottom: 23px; }
+    .round-line { display: flex; justify-content: space-between; font-size: 13px; font-weight: 950; }
+    .progress { height: 13px; margin-top: 7px; overflow: hidden; border: 2px solid var(--ink); border-radius: 99px; background: white; }
+    .progress > div { height: 100%; background: var(--amber); transition: width .3s; }
+    .score-pill, .timer-toggle { padding: 12px 17px; border: var(--border); border-radius: 15px; background: var(--amber); box-shadow: 3px 3px 0 var(--ink); font-weight: 950; }
+    .timer-toggle { background: white; }
+    .game-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 25px; }
+    .photo-stage { position: relative; min-height: 540px; overflow: hidden; border: 4px solid var(--ink); border-radius: 34px; background: #020617; box-shadow: 10px 10px 0 var(--ink); }
+    .mystery-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); transition: filter .65s, transform .65s; }
+    .photo-stage.revealed .mystery-photo { transform: scale(1); }
+    .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(2,6,23,.9), transparent 55%, rgba(2,6,23,.4)); }
+    .stage-content { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 27px; color: white; }
+    .stage-top { display: flex; align-items: start; justify-content: space-between; gap: 14px; }
+    .clue-pill { padding: 9px 14px; border: 2px solid white; border-radius: 999px; background: var(--pink); color: var(--ink); font-size: 13px; font-weight: 950; }
+    .clock { display: grid; width: 78px; height: 78px; place-items: center; border: 4px solid white; border-radius: 50%; background: rgba(2,6,23,.72); font-size: 30px; font-weight: 950; }
+    .clock.danger { background: var(--danger); animation: pulse .7s infinite alternate; }
+    @keyframes pulse { to { transform: scale(1.08); } }
+    .worth { color: #fde68a; font-size: 13px; font-weight: 950; letter-spacing: .2em; text-transform: uppercase; }
+    .question { margin: 5px 0 0; color: white; font-size: clamp(44px, 6vw, 72px); }
+
+    .side-card { min-height: 540px; }
+    .side-card .card-body { display: flex; min-height: 532px; flex-direction: column; }
+    .guess-input { height: 58px !important; font-size: 18px; }
+    .clue-list { display: grid; gap: 10px; margin-top: 27px; }
+    .clue-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 2px solid #cbd5e1; border-radius: 12px; font-weight: 800; }
+    .clue-row.active { border-color: var(--ink); background: var(--sky); }
+    .clue-row.used { color: #94a3b8; background: #f8fafc; }
+    .message { min-height: 24px; margin: 14px 0 0; color: var(--danger); font-weight: 850; text-align: center; }
+
+    .reveal-banner { position: absolute; right: 26px; bottom: 26px; left: 26px; padding: 22px; border: 4px solid var(--ink); border-radius: 22px; background: rgba(255,255,255,.96); color: var(--ink); box-shadow: 7px 7px 0 var(--amber); text-align: center; animation: pop .38s ease-out; }
+    @keyframes pop { from { opacity: 0; transform: translateY(25px) scale(.95); } }
+    .reveal-banner h2 { font-size: clamp(40px, 5vw, 62px); text-transform: uppercase; }
+    .reveal-summary { display: grid; gap: 11px; margin-top: 22px; padding: 18px; border: 2px solid var(--ink); border-radius: 16px; background: #f8fafc; }
+    .summary-row { display: flex; justify-content: space-between; gap: 15px; }
+    .points { color: var(--amber-dark); font-size: 24px; font-weight: 950; }
+
+    .results-head { text-align: center; }
+    .trophy { display: grid; width: 95px; height: 95px; margin: auto; place-items: center; border: 4px solid var(--ink); border-radius: 50%; background: var(--amber); box-shadow: 6px 6px 0 var(--ink); font-size: 46px; }
+    .results-grid { display: grid; grid-template-columns: .7fr 1.3fr; gap: 24px; margin-top: 35px; }
+    .final-card { background: var(--pink); }
+    .final-score { margin: 5px 0; font-size: 78px; font-weight: 950; }
+    .history-list { display: grid; gap: 10px; }
+    .history-item { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 13px; border: 2px solid #cbd5e1; border-radius: 14px; }
+    .history-index { display: inline-grid; width: 34px; height: 34px; margin-right: 8px; place-items: center; border-radius: 10px; background: var(--ink); color: white; font-weight: 900; }
+
+    @media (max-width: 900px) {
+      .hero, .setup-grid, .game-grid, .results-grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 20px; }
+      .hero-card { width: min(100%, 410px); }
+      .participants { grid-template-columns: repeat(2, 1fr); }
+      .game-top { grid-template-columns: 1fr 1fr; }
+      .game-top > :first-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 600px) {
+      header { align-items: flex-start; }
+      .brand small { display: none; }
+      .header-actions .text { display: none; }
+      .screen { width: min(100% - 22px, 1200px); padding: 28px 0; }
+      .section-head, .ready { align-items: stretch; flex-direction: column; }
+      .participants { grid-template-columns: 1fr; }
+      .photo-stage { min-height: 430px; }
+      .side-card, .side-card .card-body { min-height: auto; }
+      .stage-content { padding: 18px; }
+      .clock { width: 64px; height: 64px; font-size: 24px; }
+      .reveal-banner { right: 15px; bottom: 15px; left: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button class="brand" id="homeButton" aria-label="Go to home screen">
+      <span class="brand-icon">👶</span>
+      <span><strong>WHO'S THAT TEAMMATE?</strong><small>Baby Picture Challenge</small></span>
+    </button>
+    <div class="header-actions">
+      <button class="btn btn-small" id="soundButton" title="Toggle sound">🔊</button>
+      <button class="btn btn-small hidden" id="resetButton">↻ <span class="text">Reset</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section id="homeScreen" class="screen hero">
+      <div>
+        <div class="badge">✨ TEAM BUILDING, BUT CUTER</div>
+        <h1>CAN YOU SPOT YOUR <span>TEAMMATE?</span></h1>
+        <p class="lead">Guess the person from their blurred baby photo. Guess earlier for more points, or wait for a clearer clue.</p>
+        <div class="actions">
+          <button class="btn btn-primary" id="createButton">▶ Create Game</button>
+          <button class="btn" id="demoButton">Try Demo</button>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-placeholder">👶</div>
+        <div class="hero-label"><small>CLUE LEVEL 1</small>WHO IS THIS?</div>
+      </div>
+    </section>
+
+    <section id="setupScreen" class="screen hidden">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Game Setup</p>
+          <h2>Add the mystery teammates</h2>
+          <p class="muted">Photos remain inside this browser tab and are not uploaded to a server.</p>
+        </div>
+        <div class="count-pill">👥 <span id="participantCount">0</span> participant<span id="participantPlural">s</span></div>
+      </div>
+
+      <div class="setup-grid">
+        <div class="card">
+          <div class="card-body">
+            <h3>New participant</h3>
+            <label for="participantName">Name</label>
+            <input id="participantName" type="text" placeholder="e.g. Raymark" maxlength="60">
+            <label for="participantFact">Fun childhood fact <span class="muted">(optional)</span></label>
+            <input id="participantFact" type="text" placeholder="e.g. Wanted to become a pilot" maxlength="140">
+            <label>Baby picture</label>
+            <button class="upload" id="uploadArea" type="button">
+              <span id="uploadPrompt"><span class="upload-icon">🖼️</span><br><strong>Drop a photo here</strong><br><span class="muted">or click to browse</span></span>
+              <img id="imagePreview" class="hidden" alt="Selected baby picture preview">
+            </button>
+            <input id="imageInput" class="hidden" type="file" accept="image/*">
+            <button class="btn btn-primary full" id="addButton" disabled>＋ Add Participant</button>
+          </div>
+        </div>
+
+        <div>
+          <div id="emptyState" class="empty">
+            <div><div style="font-size:50px">📤</div><h3>No participants yet</h3><p class="muted">Add at least one participant to begin.</p><button class="btn" id="loadDemoButton">Load demo players</button></div>
+          </div>
+          <div id="participantList" class="participants hidden"></div>
+          <div class="ready">
+            <div><strong style="font-size:20px">Ready to play?</strong><br><span class="muted">The participant order will be randomized.</span></div>
+            <button class="btn btn-dark" id="startButton" disabled>▶ Start Game</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen hidden">
+      <div class="game-top">
+        <div>
+          <div class="round-line"><span id="roundText">ROUND 1 OF 1</span><span id="progressText">0%</span></div>
+          <div class="progress"><div id="progressBar" style="width:0%"></div></div>
+        </div>
+        <div class="score-pill">🏆 <span id="scoreText">0</span> PTS</div>
+        <button class="timer-toggle" id="timerButton">⏱ Timer On</button>
+      </div>
+
+      <div class="game-grid">
+        <div class="photo-stage" id="photoStage">
+          <img class="mystery-photo" id="mysteryPhoto" alt="Blurred mystery teammate">
+          <div class="shade"></div>
+          <div class="stage-content" id="clueStage">
+            <div class="stage-top"><span class="clue-pill" id="cluePill">CLUE 1: EXPERT MODE</span><span class="clock" id="clock">15</span></div>
+            <div><div class="worth" id="worthText">WORTH 3 POINTS</div><h2 class="question">WHO IS THIS?</h2></div>
+          </div>
+          <div class="reveal-banner hidden" id="revealBanner">
+            <div class="eyebrow">The teammate is...</div>
+            <h2 id="revealName">IT'S SOMEONE!</h2>
+            <p id="revealFact" class="muted"></p>
+          </div>
+        </div>
+
+        <div class="card side-card">
+          <div class="card-body">
+            <div id="guessPanel">
+              <p class="eyebrow">Your Guess</p>
+              <h3>Lock in an answer 🔒</h3>
+              <input class="guess-input" id="guessInput" type="text" placeholder="Type the teammate's name..." autocomplete="off">
+              <button class="btn btn-primary full" id="guessButton">🔒 Lock Guess for 3 Points</button>
+              <div class="message" id="guessMessage"></div>
+              <button class="btn btn-link full" id="giveUpButton">👁 Give up and reveal</button>
+              <div class="clue-list" id="clueList"></div>
+            </div>
+
+            <div id="revealPanel" class="hidden">
+              <div style="font-size:50px">✨</div>
+              <h3 style="font-size:31px">REVEALED!</h3>
+              <div class="reveal-summary">
+                <div class="summary-row"><span class="muted">Your guess</span><strong id="summaryGuess">No guess</strong></div>
+                <div class="summary-row"><span class="muted">Answer</span><strong id="summaryAnswer"></strong></div>
+                <div class="summary-row" style="border-top:2px solid #cbd5e1;padding-top:10px"><strong>Points earned</strong><span class="points" id="summaryPoints">+0</span></div>
+              </div>
+              <button class="btn btn-dark full" id="nextButton">Next Teammate →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultsScreen" class="screen hidden">
+      <div class="results-head">
+        <div class="trophy">🏆</div>
+        <p class="eyebrow" style="margin-top:28px">Game Complete</p>
+        <h2>GREAT GUESSING!</h2>
+        <p class="lead" style="margin:15px auto">You scored <strong id="finalScoreInline">0 points</strong> across <span id="finalRounds">0</span> rounds.</p>
+      </div>
+      <div class="results-grid">
+        <div class="card final-card"><div class="card-body"><div class="eyebrow" style="color:var(--ink)">Final Score</div><div class="final-score" id="finalScore">0</div><p id="possibleScore">out of 0 possible points</p><button class="btn full" id="playAgainButton">↻ Play Again</button></div></div>
+        <div class="card"><div class="card-body"><h3>Round Summary</h3><div class="history-list" id="historyList"></div></div></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const CLUES = [
+      { label: "Expert Mode", blur: 30, points: 3, seconds: 15 },
+      { label: "Getting Warmer", blur: 14, points: 2, seconds: 12 },
+      { label: "Final Clue", blur: 5, points: 1, seconds: 10 }
+    ];
+
+    const state = {
+      screen: "home",
+      participants: [],
+      pendingImage: "",
+      rounds: [],
+      roundIndex: 0,
+      clueIndex: 0,
+      phase: "clue",
+      timeLeft: 15,
+      score: 0,
+      roundPoints: 0,
+      lockedGuess: "",
+      history: [],
+      timerOn: true,
+      soundOn: true,
+      timerId: null
+    };
+
+    const $ = id => document.getElementById(id);
+    const screens = { home: $("homeScreen"), setup: $("setupScreen"), game: $("gameScreen"), results: $("resultsScreen") };
+
+    function showScreen(name) {
+      Object.entries(screens).forEach(([key, node]) => node.classList.toggle("hidden", key !== name));
+      state.screen = name;
+      $("resetButton").classList.toggle("hidden", name === "home");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (name !== "game") stopTimer();
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#039;", '"': "&quot;" })[c]);
+    }
+
+    function makeId() { return Date.now() + "-" + Math.random().toString(36).slice(2); }
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function normalizeName(value) {
+      return value.toLocaleLowerCase().trim().replace(/[^a-z0-9\s]/gi, "").replace(/\s+/g, " ");
+    }
+
+    function validateNewParticipant() {
+      $("addButton").disabled = !$("participantName").value.trim() || !state.pendingImage;
+    }
+
+    function readImage(file) {
+      if (!file || !file.type.startsWith("image/")) {
+        alert("Please select a valid image file.");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Please choose an image smaller than 10 MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = event => {
+        state.pendingImage = event.target.result;
+        $("imagePreview").src = state.pendingImage;
+        $("imagePreview").classList.remove("hidden");
+        $("uploadPrompt").classList.add("hidden");
+        validateNewParticipant();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function addParticipant() {
+      const name = $("participantName").value.trim();
+      const fact = $("participantFact").value.trim();
+      if (!name || !state.pendingImage) return;
+      state.participants.push({ id: makeId(), name, fact, image: state.pendingImage });
+      $("participantName").value = "";
+      $("participantFact").value = "";
+      $("imageInput").value = "";
+      state.pendingImage = "";
+      $("imagePreview").src = "";
+      $("imagePreview").classList.add("hidden");
+      $("uploadPrompt").classList.remove("hidden");
+      validateNewParticipant();
+      renderParticipants();
+    }
+
+    function createDemoImage(icon, color1, color2) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${color1}"/><stop offset="1" stop-color="${color2}"/></linearGradient></defs><rect width="900" height="1100" fill="url(#g)"/><circle cx="450" cy="420" r="250" fill="#ffd6b3"/><circle cx="355" cy="390" r="25" fill="#172033"/><circle cx="545" cy="390" r="25" fill="#172033"/><path d="M350 535 Q450 620 550 535" fill="none" stroke="#172033" stroke-width="22" stroke-linecap="round"/><text x="450" y="960" text-anchor="middle" font-size="150">${icon}</text></svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function loadDemoPlayers() {
+      state.participants = [
+        { id: makeId(), name: "Alex", fact: "Wanted to be an astronaut", image: createDemoImage("🚀", "#bae6fd", "#c4b5fd") },
+        { id: makeId(), name: "Jamie", fact: "Favorite childhood snack was ice cream", image: createDemoImage("🍦", "#fbcfe8", "#fde68a") },
+        { id: makeId(), name: "Sam", fact: "Could sing before learning the alphabet", image: createDemoImage("🎵", "#bbf7d0", "#bae6fd") }
+      ];
+      renderParticipants();
+    }
+
+    function renderParticipants() {
+      const count = state.participants.length;
+      $("participantCount").textContent = count;
+      $("participantPlural").textContent = count === 1 ? "" : "s";
+      $("emptyState").classList.toggle("hidden", count > 0);
+      $("participantList").classList.toggle("hidden", count === 0);
+      $("startButton").disabled = count === 0;
+      $("participantList").innerHTML = state.participants.map((p, i) => `
+        <article class="person">
+          <div class="person-photo"><img src="${p.image}" alt="${escapeHtml(p.name)} baby photo"><span class="person-number">#${i + 1}</span></div>
+          <div class="person-info"><div><strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.fact || "Mystery fact not provided")}</small></div><button class="btn btn-small btn-danger remove-person" data-id="${p.id}" title="Remove participant">🗑</button></div>
+        </article>`).join("");
+      document.querySelectorAll(".remove-person").forEach(button => button.addEventListener("click", () => {
+        state.participants = state.participants.filter(p => p.id !== button.dataset.id);
+        renderParticipants();
+      }));
+    }
+
+    function startGame() {
+      if (!state.participants.length) return;
+      state.rounds = shuffle(state.participants);
+      state.roundIndex = 0;
+      state.score = 0;
+      state.history = [];
+      beginRound();
+      showScreen("game");
+    }
+
+    function beginRound() {
+      state.clueIndex = 0;
+      state.phase = "clue";
+      state.roundPoints = 0;
+      state.lockedGuess = "";
+      $("guessInput").value = "";
+      $("guessMessage").textContent = "";
+      $("guessPanel").classList.remove("hidden");
+      $("revealPanel").classList.add("hidden");
+      $("clueStage").classList.remove("hidden");
+      $("revealBanner").classList.add("hidden");
+      $("photoStage").classList.remove("revealed");
+      renderGame();
+      resetTimer();
+      setTimeout(() => $("guessInput").focus(), 100);
+    }
+
+    function renderGame() {
+      const current = state.rounds[state.roundIndex];
+      const clue = CLUES[state.clueIndex];
+      const progress = state.rounds.length ? (state.roundIndex / state.rounds.length) * 100 : 0;
+      $("roundText").textContent = `ROUND ${state.roundIndex + 1} OF ${state.rounds.length}`;
+      $("progressText").textContent = `${Math.round(progress)}%`;
+      $("progressBar").style.width = `${progress}%`;
+      $("scoreText").textContent = state.score;
+      $("mysteryPhoto").src = current.image;
+      $("mysteryPhoto").style.filter = `blur(${clue.blur}px)`;
+      $("cluePill").textContent = `CLUE ${state.clueIndex + 1}: ${clue.label.toUpperCase()}`;
+      $("worthText").textContent = `WORTH ${clue.points} POINT${clue.points === 1 ? "" : "S"}`;
+      $("guessButton").textContent = `🔒 Lock Guess for ${clue.points} Point${clue.points === 1 ? "" : "s"}`;
+      $("timerButton").textContent = state.timerOn ? "⏱ Timer On" : "⏱ Timer Off";
+      $("clueList").innerHTML = CLUES.map((item, i) => `<div class="clue-row ${i === state.clueIndex ? "active" : i < state.clueIndex ? "used" : ""}"><span>${i < state.clueIndex ? "◉" : "👁"} ${item.label}</span><span>${item.points} PT</span></div>`).join("");
+    }
+
+    function resetTimer() {
+      stopTimer();
+      state.timeLeft = CLUES[state.clueIndex].seconds;
+      updateClock();
+      if (state.timerOn && state.phase === "clue") {
+        state.timerId = setInterval(() => {
+          state.timeLeft = Math.max(0, state.timeLeft - 1);
+          updateClock();
+          if (state.timeLeft === 0) {
+            stopTimer();
+            handleWrongGuess("Time is up!");
+          }
+        }, 1000);
+      }
+    }
+
+    function stopTimer() {
+      if (state.timerId) clearInterval(state.timerId);
+      state.timerId = null;
+    }
+
+    function updateClock() {
+      $("clock").textContent = state.timerOn ? state.timeLeft : "∞";
+      $("clock").classList.toggle("danger", state.timerOn && state.timeLeft <= 5);
+    }
+
+    function toggleTimer() {
+      state.timerOn = !state.timerOn;
+      renderGame();
+      resetTimer();
+    }
+
+    function lockGuess() {
+      const guess = $("guessInput").value.trim();
+      if (!guess || state.phase !== "clue") return;
+      state.lockedGuess = guess;
+      const current = state.rounds[state.roundIndex];
+      if (normalizeName(guess) === normalizeName(current.name)) {
+        state.roundPoints = CLUES[state.clueIndex].points;
+        playTone(true);
+        revealRound();
+      } else {
+        playTone(false);
+        handleWrongGuess("Not quite. Here is a clearer clue!");
+      }
+    }
+
+    function handleWrongGuess(message) {
+      if (state.phase !== "clue") return;
+      if (state.clueIndex < CLUES.length - 1) {
+        state.clueIndex++;
+        $("guessInput").value = "";
+        $("guessMessage").textContent = message;
+        renderGame();
+        resetTimer();
+        $("guessInput").focus();
+      } else {
+        state.roundPoints = 0;
+        if (!state.lockedGuess) state.lockedGuess = $("guessInput").value.trim() || "No guess";
+        revealRound();
+      }
+    }
+
+    function giveUp() {
+      state.lockedGuess = $("guessInput").value.trim() || "No guess";
+      state.roundPoints = 0;
+      revealRound();
+    }
+
+    function revealRound() {
+      stopTimer();
+      state.phase = "reveal";
+      const current = state.rounds[state.roundIndex];
+      $("mysteryPhoto").style.filter = "blur(0px)";
+      $("photoStage").classList.add("revealed");
+      $("clueStage").classList.add("hidden");
+      $("revealBanner").classList.remove("hidden");
+      $("revealName").textContent = `IT'S ${current.name}!`;
+      $("revealFact").textContent = current.fact ? `“${current.fact}”` : "";
+      $("guessPanel").classList.add("hidden");
+      $("revealPanel").classList.remove("hidden");
+      $("summaryGuess").textContent = state.lockedGuess || "No guess";
+      $("summaryAnswer").textContent = current.name;
+      $("summaryPoints").textContent = `+${state.roundPoints}`;
+      $("nextButton").textContent = state.roundIndex === state.rounds.length - 1 ? "See Results →" : "Next Teammate →";
+      const progress = ((state.roundIndex + 1) / state.rounds.length) * 100;
+      $("progressText").textContent = `${Math.round(progress)}%`;
+      $("progressBar").style.width = `${progress}%`;
+    }
+
+    function nextRound() {
+      const current = state.rounds[state.roundIndex];
+      state.score += state.roundPoints;
+      state.history.push({ name: current.name, guess: state.lockedGuess || "No guess", points: state.roundPoints });
+      if (state.roundIndex >= state.rounds.length - 1) {
+        renderResults();
+        showScreen("results");
+      } else {
+        state.roundIndex++;
+        beginRound();
+      }
+    }
+
+    function renderResults() {
+      $("finalScore").textContent = state.score;
+      $("finalScoreInline").textContent = `${state.score} point${state.score === 1 ? "" : "s"}`;
+      $("finalRounds").textContent = state.rounds.length;
+      $("possibleScore").textContent = `out of ${state.rounds.length * 3} possible points`;
+      $("historyList").innerHTML = state.history.map((item, i) => `<div class="history-item"><div><span class="history-index">${i + 1}</span><strong>${escapeHtml(item.name)}</strong><br><small class="muted" style="margin-left:46px">Guessed: ${escapeHtml(item.guess)}</small></div><strong>+${item.points}</strong></div>`).join("");
+    }
+
+    function playAgain() {
+      state.rounds = shuffle(state.participants);
+      state.roundIndex = 0;
+      state.score = 0;
+      state.history = [];
+      beginRound();
+      showScreen("game");
+    }
+
+    function playTone(success) {
+      if (!state.soundOn) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.frequency.value = success ? 660 : 220;
+        oscillator.type = success ? "sine" : "triangle";
+        gain.gain.setValueAtTime(.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .35);
+        oscillator.start();
+        oscillator.stop(ctx.currentTime + .35);
+      } catch (error) { /* Sound is optional. */ }
+    }
+
+    function resetAll() {
+      if (!confirm("Reset the game and remove all participant photos?")) return;
+      stopTimer();
+      state.participants = [];
+      state.rounds = [];
+      state.history = [];
+      state.score = 0;
+      state.pendingImage = "";
+      renderParticipants();
+      showScreen("home");
+    }
+
+    $("homeButton").addEventListener("click", () => showScreen("home"));
+    $("createButton").addEventListener("click", () => showScreen("setup"));
+    $("demoButton").addEventListener("click", () => { loadDemoPlayers(); showScreen("setup"); });
+    $("loadDemoButton").addEventListener("click", loadDemoPlayers);
+    $("participantName").addEventListener("input", validateNewParticipant);
+    $("uploadArea").addEventListener("click", () => $("imageInput").click());
+    $("imageInput").addEventListener("change", event => readImage(event.target.files[0]));
+    $("uploadArea").addEventListener("dragover", event => { event.preventDefault(); $("uploadArea").classList.add("dragover"); });
+    $("uploadArea").addEventListener("dragleave", () => $("uploadArea").classList.remove("dragover"));
+    $("uploadArea").addEventListener("drop", event => { event.preventDefault(); $("uploadArea").classList.remove("dragover"); readImage(event.dataTransfer.files[0]); });
+    $("addButton").addEventListener("click", addParticipant);
+    $("startButton").addEventListener("click", startGame);
+    $("guessButton").addEventListener("click", lockGuess);
+    $("guessInput").addEventListener("keydown", event => { if (event.key === "Enter") lockGuess(); });
+    $("giveUpButton").addEventListener("click", giveUp);
+    $("nextButton").addEventListener("click", nextRound);
+    $("timerButton").addEventListener("click", toggleTimer);
+    $("playAgainButton").addEventListener("click", playAgain);
+    $("resetButton").addEventListener("click", resetAll);
+    $("soundButton").addEventListener("click", () => { state.soundOn = !state.soundOn; $("soundButton").textContent = state.soundOn ? "🔊" : "🔇"; });
+
+    renderParticipants();
+    showScreen("home");
+  </script>
+</body>
+</html>
